@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="autoddc">
+  <schema id="org.gnome.shell.extensions.autoddc" path="/org/gnome/shell/extensions/autoddc/">
+    
+    <key name="extension-enabled" type="b">
+      <default>true</default>
+      <summary>Global Enable Switch</summary>
+    </key>
+
+    <key name="disabled-monitors" type="as">
+      <default>[]</default>
+      <summary>List of display IDs to explicitly ignore</summary>
+    </key>
+
+    <key name="use-automatic-location" type="b">
+      <default>false</default>
+      <summary>Use Automatic Location</summary>
+    </key>
+
+    <key name="auto-dim-sunset" type="b">
+      <default>true</default>
+      <summary>Decrease brightness at sunset</summary>
+    </key>
+
+    <key name="auto-brighten-sunrise" type="b">
+      <default>false</default>
+      <summary>Increase brightness at sunrise</summary>
+    </key>
+
+    <key name="catch-up-sunset" type="b">
+      <default>true</default>
+      <summary>Catch up to target brightness if loaded after sunset</summary>
+    </key>
+
+    <key name="catch-up-sunrise" type="b">
+      <default>true</default>
+      <summary>Catch up to target brightness if loaded after sunrise</summary>
+    </key>
+
+    <key name="cached-sunrise-time" type="s">
+      <default>''</default>
+      <summary>Cached Sunrise Time</summary>
+    </key>
+
+    <key name="last-error" type="s">
+      <default>''</default>
+      <summary>Last Fetch Error</summary>
+    </key>
+
+    <key name="cached-sunset-time" type="s">
+      <default>''</default>
+      <summary>Cached Sunset Time</summary>
+    </key>
+
+    <key name="sunset-hour" type="i">
+      <default>20</default>
+    </key>
+
+    <key name="sunset-minute" type="i">
+      <default>0</default>
+    </key>
+    
+    <key name="sunrise-hour" type="i">
+      <default>7</default>
+    </key>
+    
+    <key name="sunrise-minute" type="i">
+      <default>0</default>
+    </key>
+
+    <key name="min-brightness" type="i">
+      <default>20</default>
+      <summary>Minimum Brightness Target (%)</summary>
+    </key>
+
+    <key name="max-brightness" type="i">
+      <default>100</default>
+      <summary>Maximum Brightness Target (%)</summary>
+    </key>
+
+    <key name="dim-step-delay" type="i">
+      <default>30</default>
+      <summary>Seconds between brightness steps</summary>
+    </key>
+
+    <key name="reset-on-exit" type="b">
+      <default>true</default>
+      <summary>Reset brightness to 100% on exit</summary>
+    </key>
+
+  </schema>
+</schemalist>
