@@ -26,11 +26,13 @@ export default class AutoDDCExtension extends Extension {
         this._timerId = null;
         this._transitionLoopId = null;
         this._hotplugId = null;
+        this._initialCheckTimeId = null;
         this._isTransitioning = false;
         this._ddcBusy = false;
         this._monitorStates = {};
         this._signals = [];
         this._geoclueClient = null;
+        this._geoclueLocationSignalId = null;
         this._updateSunsetTimeId = null;
         
         this._ddcutilPath = GLib.find_program_in_path('ddcutil');
@@ -66,7 +68,9 @@ export default class AutoDDCExtension extends Extension {
         if (this._settings.get_boolean('extension-enabled') && this._ddcutilPath) {
             this._setupGeoclue(); 
             this._updateSunsetTime();
-            GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 2, () => this._checkTime());
+            this._initialCheckTimeId = GLib.timeout_add_seconds(
+                GLib.PRIORITY_DEFAULT, 2, () => this._checkTime(),
+            );
         }
     }
 
@@ -82,11 +86,18 @@ export default class AutoDDCExtension extends Extension {
             GLib.source_remove(this._transitionLoopId);
         if (this._hotplugId) 
             GLib.source_remove(this._hotplugId);
+        if (this._initialCheckTimeId)
+            GLib.source_remove(this._initialCheckTimeId);
         if (this._updateSunsetTimeId)
             GLib.source_remove(this._updateSunsetTimeId);
         
         if (this._monitorsChangedId && global.backend.get_monitor_manager()) {
             global.backend.get_monitor_manager().disconnect(this._monitorsChangedId);
+        }
+
+        if (this._geoclueClient && this._geoclueLocationSignalId) {
+            this._geoclueClient.disconnect(this._geoclueLocationSignalId);
+            this._geoclueLocationSignalId = null;
         }
 
         this._signals.forEach(id => this._settings.disconnect(id));
@@ -134,7 +145,10 @@ export default class AutoDDCExtension extends Extension {
                     }
                 });
             });
-            this._geoclueClient.connect('notify::location', () => this._updateSunsetTime());
+            this._geoclueLocationSignalId = this._geoclueClient.connect(
+                'notify::location', () => this._updateSunsetTime(),
+            );
+            
             if (this._geoclueClient.location) this._updateSunsetTime();
         } catch (e) {
             console.error(`[AutoDDC-Brightness] Geoclue Error: ${e.message}`);
