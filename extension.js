@@ -17,7 +17,62 @@ import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
 import Soup from 'gi://Soup';
 import Geoclue from 'gi://Geoclue';
-import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
+import GObject from 'gi://GObject';
+
+import { Extension, gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as QuickSettings from 'resource:///org/gnome/shell/ui/quickSettings.js';
+
+const QuickSettingsMenu = Main.panel.statusArea.quickSettings;
+
+const AutoDDCToggle = GObject.registerClass(
+class AutoDDCToggle extends QuickSettings.QuickToggle {
+    _init(extension) {
+        super._init({
+            title: _('Auto DDC/CI'),
+            iconName: 'display-brightness-symbolic',
+            toggleMode: true,
+        });
+
+        this._settings = extension._settings;
+        this.checked = this._settings.get_boolean('extension-enabled');
+
+        this.connect('clicked', () => {
+            this._settings.set_boolean('extension-enabled', this.checked);
+        });
+
+        this._settings.connectObject(
+            'changed::extension-enabled',
+            () => {
+                this.checked = this._settings.get_boolean('extension-enabled');
+            },
+            this
+        );
+    }
+}
+);
+
+const AutoDDC = GObject.registerClass(
+class AutoDDC extends QuickSettings.SystemIndicator {
+    _init(extension) {
+        super._init();
+
+        this._autoDDCToggle = new AutoDDCToggle(extension);
+        this.quickSettingsItems.push(this._autoDDCToggle);
+
+        if (QuickSettingsMenu)
+            QuickSettingsMenu.addExternalIndicator(this);
+    }
+
+    destroy() {
+        if (QuickSettingsMenu)
+            QuickSettingsMenu.removeExternalIndicator(this);
+
+        this._autoDDCToggle?.destroy();
+        super.destroy();
+    }
+}
+);
 
 export default class AutoDDCExtension extends Extension {
     enable() {
@@ -34,6 +89,7 @@ export default class AutoDDCExtension extends Extension {
         this._geoclueClient = null;
         this._geoclueLocationSignalId = null;
         this._updateSunsetTimeId = null;
+        this._indicator = new AutoDDC(this);
         
         this._ddcutilPath = GLib.find_program_in_path('ddcutil');
         if (!this._ddcutilPath)
@@ -105,6 +161,11 @@ export default class AutoDDCExtension extends Extension {
         
         this._geoclueClient = null;
         this._httpSession = null;
+
+        if (this._indicator) {
+            this._indicator.destroy();
+            this._indicator = null;
+        }
     }
 
     _reload() {
