@@ -136,19 +136,30 @@ export default class AutoDDCExtension extends Extension {
                 this._setBrightness(id, 100).catch(() => {});
         }
 
-        if (this._timerId) 
+        if (this._timerId) {
             GLib.source_remove(this._timerId);
-        if (this._transitionLoopId) 
+            this._timerId = null;
+        }
+        if (this._transitionLoopId) {
             GLib.source_remove(this._transitionLoopId);
-        if (this._hotplugId) 
+            this._transitionLoopId = null;
+        }
+        if (this._hotplugId) {
             GLib.source_remove(this._hotplugId);
-        if (this._initialCheckTimeId)
+            this._hotplugId = null;
+        }
+        if (this._initialCheckTimeId) {
             GLib.source_remove(this._initialCheckTimeId);
-        if (this._updateSunsetTimeId)
+            this._initialCheckTimeId = null;
+        }
+        if (this._updateSunsetTimeId) {
             GLib.source_remove(this._updateSunsetTimeId);
+            this._updateSunsetTimeId = null;
+        }
         
         if (this._monitorsChangedId && global.backend.get_monitor_manager()) {
             global.backend.get_monitor_manager().disconnect(this._monitorsChangedId);
+            this._monitorsChangedId = null;
         }
 
         if (this._geoclueClient && this._geoclueLocationSignalId) {
